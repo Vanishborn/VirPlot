@@ -99,7 +99,7 @@ title: ""
 --smooth          Smooth depth plot using moving average
 --grid            Enable background grid on depth plot
 --no-border       Remove borders around annotation rectangles
---title           Show title specified in YAML
+--title           Show title specified within YAML
 ```
 
 The resulting plot will contain:
