@@ -82,7 +82,7 @@ title: ""
 ## Usage
 
 ```bash
-daplot [-h] -g GFF -d DEPTH -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--no-border] [--Osvg] [--Opdf] [--Opng]
+./daplot [-h] -g GFF -d DEPTH -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--no-border] [--title] [--Osvg] [--Opdf] [--Opng]
 ```
 
 ### Common Options
@@ -99,6 +99,7 @@ daplot [-h] -g GFF -d DEPTH -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--no-b
 --smooth          Smooth depth plot using moving average
 --grid            Enable background grid on depth plot
 --no-border       Remove borders around annotation rectangles
+--title           Show title specified in YAML
 ```
 
 The resulting plot will contain:
@@ -114,13 +115,13 @@ The resulting plot will contain:
 
 All major visual elements are customizable via the YAML file:
 
-| Key                   | Description                                       |
-| --------------------- | ------------------------------------------------- |
-| `color_mapping`       | Maps product names to colors                      |
-| `default_color`       | Color for unmapped products                       |
-| `depth_line_color`    | Line color for depth plot                         |
-| `annotation_fontsize` | Font size for labels inside feature boxes         |
-| `title`               | Plot title (not yet implemented)                  |
+| Key                   | Description                               |
+| --------------------- | ----------------------------------------- |
+| `color_mapping`       | Maps product names to colors              |
+| `default_color`       | Color for unmapped products               |
+| `depth_line_color`    | Line color for depth plot                 |
+| `annotation_fontsize` | Font size for labels inside feature boxes |
+| `title`               | Plot title                                |
 
 To update feature colors or fonts, edit `spec.yml` and rerun the script.
 

@@ -76,7 +76,8 @@ def load_settings(yaml_path):
 	default_color = settings.get("default_color", "#9F9F9F")
 	depth_color = settings.get("depth_color", "blue")
 	fontsize = settings.get("annotation_fontsize", 8)
-	return color_mapping, default_color, depth_color, fontsize
+	title = settings.get("title", "")
+	return color_mapping, default_color, depth_color, fontsize, title
 
 
 def smooth_depth(y_vals, window_size=10):
@@ -105,6 +106,8 @@ parser.add_argument("--smooth", action="store_true",
 	help="Smooth depth plot using moving average")
 parser.add_argument("--no-border", action="store_true", 
 	help="Do not draw borders around feature rectangles")
+parser.add_argument("--title", action="store_true",
+    help="Show title specified in YAML")
 parser.add_argument("--Osvg", action="store_true", 
 	help="Output in SVG format (default)")
 parser.add_argument("--Opdf", action="store_true", 
@@ -142,7 +145,7 @@ if not args.yaml.endswith(".yml") and not args.yaml.endswith(".yaml"):
 
 sequence_length, features = parse_gff(args.gff)
 depth = parse_depth(args.depth)
-color_mapping, default_color, depth_color, annotation_fontsize = load_settings(args.yaml)
+color_mapping, default_color, depth_color, annotation_fontsize, plot_title = load_settings(args.yaml)
 
 print(f"[DAplot] Parsed {len(features)} features from GFF")
 print(f"[DAplot] Parsed {len(depth)} depth entries")
@@ -230,7 +233,9 @@ ax_depth.set_xlabel("Genome Position (bp)", fontsize=10)
 if args.grid:
 	ax_depth.grid(True, linestyle="--", linewidth=0.3)
 
-plt.tight_layout()
+if args.title:
+	plt.tight_layout(rect=[0, 0, 1, 0.95])
+	fig.suptitle(plot_title, fontsize=14, fontweight="bold")
 
 
 #######
