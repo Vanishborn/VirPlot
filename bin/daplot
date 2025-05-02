@@ -224,7 +224,7 @@ if args.smooth:
 	y_depth = smooth_depth(np.array(y_depth), window_size=15)
 
 ax_depth.plot(x_depth, y_depth, color=depth_color, linewidth=0.8)
-ax_depth.set_ylabel("Depth", fontsize=10)
+ax_depth.set_ylabel("Seq Depth", fontsize=10)
 ax_depth.set_xlabel("Genome Position (bp)", fontsize=10)
 
 if args.grid:
