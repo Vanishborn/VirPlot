@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+# daplot.py — Annotation + Depth plot in SVG/PDF/PNG
+
+import numpy as np
+from matplotlib.patches import Rectangle
+import matplotlib.pyplot as plt
+import os
+import argparse
+import yaml
+import sys
+
+
+#########
+# funcs #
+#########
+
+def parse_gff(gff_path):
+	features = []
+	sequence_length = None
+
+	with open(gff_path, "r") as fp:
+		for line in fp:
+			line = line.strip()
+
+			if line.startswith("#") or not line:
+				continue
+
+			parts = line.split("\t")
+			if len(parts) != 9:
+				continue
+
+			seqid, source, feature_type, start, end, score, strand, phase, attributes = parts
+
+			if feature_type == "region" and sequence_length is None:
+				sequence_length = int(end)
+				continue
+
+			if feature_type != "CDS":
+				continue
+
+			info_dict = {}
+			for attr in attributes.split(";"):
+				if "=" in attr:
+					key, value = attr.split("=", 1)
+					info_dict[key] = value
+
+			product = info_dict.get("product", "unknown")
+
+			features.append({
+				"start": int(start),
+				"end": int(end),
+				"strand": strand,
+				"product": product
+			})
+
+	if sequence_length is None:
+		print("[DAplot] ERROR: No 'region' feature found in GFF")
+		sys.exit(1)
+
+	return sequence_length, features
+
+
+def parse_depth(depth_path):
+	depth = {}
+	with open(depth_path, "r") as fp:
+		for line in fp:
+			chrom, pos, cov = line.strip().split()
+			depth[int(pos)] = int(cov)
+	return depth
+
+
+def load_settings(yaml_path):
+	with open(yaml_path, "r") as fp:
+		settings = yaml.safe_load(fp)
+	color_mapping = settings.get("color_mapping", {})
+	default_color = settings.get("default_color", "#9F9F9F")
+	depth_color = settings.get("depth_color", "blue")
+	fontsize = settings.get("annotation_fontsize", 8)
+	return color_mapping, default_color, depth_color, fontsize
+
+
+def smooth_depth(y_vals, window_size=10):
+	kernel = np.ones(window_size) / window_size
+	return np.convolve(y_vals, kernel, mode='same')
+
+
+############
+# argparse #
+############
+
+parser = argparse.ArgumentParser(description="Virus genome SVG generator from GFF and depth")
+parser.add_argument("-g", "--gff", required=True, 
+	help="Path to GFF3 annotation file")
+parser.add_argument("-d", "--depth", required=True, 
+	help="Path to samtools depth file")
+parser.add_argument("-y", "--yaml", required=True, 
+	help="YAML file for color mapping")
+parser.add_argument("-o", "--outdir", default=".", 
+	help="Output directory for the plot")
+parser.add_argument("-n", "--normalize", action="store_true", 
+	help="Normalize depth values to max=1")
+parser.add_argument("--grid", action="store_true", 
+	help="Enable background grid on depth plot")
+parser.add_argument("--smooth", action="store_true", 
+	help="Smooth depth plot using moving average")
+parser.add_argument("--no-border", action="store_true", 
+	help="Do not draw borders around feature rectangles")
+parser.add_argument("--Osvg", action="store_true", 
+	help="Output in SVG format (default)")
+parser.add_argument("--Opdf", action="store_true", 
+	help="Output in PDF format")
+parser.add_argument("--Opng", action="store_true", 
+	help="Output in PNG format")
+
+args = parser.parse_args()
+
+
+##########
+# checks #
+##########
+
+if not os.path.isfile(args.gff):
+	print(f"[DAplot] ERROR: GFF file not found: {args.gff}")
+	sys.exit(1)
+if not args.gff.endswith(".gff3"):
+	print(f"[DAplot] ERROR: GFF file must end with .gff3: {args.gff}")
+	sys.exit(1)
+if not os.path.isfile(args.depth):
+	print(f"[DAplot] ERROR: Depth file not found: {args.depth}")
+	sys.exit(1)
+if not os.path.isfile(args.yaml):
+	print(f"[DAplot] ERROR: YAML file not found: {args.yaml}")
+	sys.exit(1)
+if not args.yaml.endswith(".yml") and not args.yaml.endswith(".yaml"):
+	print(f"[DAplot] ERROR: YAML file extension error: {args.yaml}")
+	sys.exit(1)
+
+
+########
+# main #
+########
+
+sequence_length, features = parse_gff(args.gff)
+depth = parse_depth(args.depth)
+color_mapping, default_color, depth_color, annotation_fontsize = load_settings(args.yaml)
+
+print(f"[DAplot] Parsed {len(features)} features from GFF")
+print(f"[DAplot] Parsed {len(depth)} depth entries")
+
+if args.Opdf:
+	ext = "pdf"
+elif args.Opng:
+	ext = "png"
+else:
+	ext = "svg"
+output_path = os.path.join(args.outdir, f"daplot.{ext}")
+
+
+############
+# plotting #
+############
+
+fig, (ax_ann, ax_depth) = plt.subplots(
+	2, 1,
+	figsize=(12, 4),
+	sharex=True,
+	gridspec_kw={"height_ratios": [1, 1]}
+)
+
+
+##############
+# annotation #
+##############
+
+y_base = 0.5
+feature_height = 0.6
+alternate = True
+label_pad = int(sequence_length * 0.02)
+genome_line_start = -label_pad
+genome_line_end = sequence_length + label_pad
+
+ax_ann.plot([genome_line_start, genome_line_end], [y_base, y_base], color='black', linewidth=1.2)
+ax_ann.text(genome_line_start - label_pad * 0.2, y_base, "5'", va='center', ha='right', fontsize=10, fontweight='bold')
+ax_ann.text(genome_line_end + label_pad * 0.2, y_base, "3'", va='center', ha='left', fontsize=10, fontweight='bold')
+
+for feature in features:
+	start = feature["start"]
+	end = feature["end"]
+	product = feature["product"]
+	strand = feature["strand"]
+	color = color_mapping.get(product, default_color)
+
+	is_above = alternate
+	y = y_base if is_above else y_base - feature_height
+
+	rect = Rectangle((start, y), end - start, feature_height,
+					 facecolor=color,
+					 edgecolor='none' if args.no_border else 'black')
+	ax_ann.add_patch(rect)
+
+	ax_ann.text((start + end) / 2, y + feature_height / 2, product, ha='center', va='center', fontsize=annotation_fontsize, color='black')
+
+	alternate = not alternate
+
+ax_ann.set_xlim(genome_line_start, genome_line_end)
+ax_ann.set_ylim(-1.5, 2.0)
+ax_ann.axis('off')
+
+
+#########
+# depth #
+#########
+
+x_depth = sorted(depth.keys())
+y_depth = [depth[pos] for pos in x_depth]
+
+if args.normalize:
+	print(f"[DAplot] Applying normalization on depth data")
+	max_val = max(y_depth)
+	y_depth = [val / max_val for val in y_depth]
+
+if args.smooth:
+	print(f"[DAplot] Smoothing depth data")
+	y_depth = smooth_depth(np.array(y_depth), window_size=15)
+
+ax_depth.plot(x_depth, y_depth, color=depth_color, linewidth=0.8)
+ax_depth.set_ylabel("Depth", fontsize=10)
+ax_depth.set_xlabel("Genome Position (bp)", fontsize=10)
+
+if args.grid:
+	ax_depth.grid(True, linestyle="--", linewidth=0.3)
+
+plt.tight_layout()
+
+
+#######
+# out #
+#######
+
+fig.savefig(output_path, format=ext)
+print(f"[DAplot] Plot saved to: {output_path}")
