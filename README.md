@@ -50,7 +50,7 @@ conda create -n daplot numpy matplotlib pyyaml
 conda activate daplot
 ```
 
-No external bioinformatics packages are needed. All file parsing is done using native Python.
+No external packages are needed. All file parsing is done using native Python libraries.
 
 ---
 
