@@ -169,6 +169,7 @@ fig, (ax_ann, ax_depth) = plt.subplots(
 	sharex=True,
 	gridspec_kw={"height_ratios": [1, 1]}
 )
+fig.subplots_adjust(hspace=0.001)
 
 
 ##############
@@ -179,12 +180,10 @@ y_base = 0.5
 feature_height = 0.6
 alternate = True
 label_pad = int(sequence_length * 0.02)
-genome_line_start = -label_pad
-genome_line_end = sequence_length + label_pad
-
-ax_ann.plot([genome_line_start, genome_line_end], [y_base, y_base], color='black', linewidth=1.2)
-ax_ann.text(genome_line_start - label_pad * 0.2, y_base, "5'", va='center', ha='right', fontsize=10, fontweight='bold')
-ax_ann.text(genome_line_end + label_pad * 0.2, y_base, "3'", va='center', ha='left', fontsize=10, fontweight='bold')
+label_pad = int(sequence_length * 0.02)
+ax_ann.plot([-label_pad, sequence_length + label_pad], [y_base, y_base], color='black', linewidth=1.2)
+ax_ann.text(-label_pad * 0.4, y_base, "5'", va='center', ha='right', fontsize=10, fontweight='bold')
+ax_ann.text(sequence_length + label_pad * 0.4, y_base, "3'", va='center', ha='left', fontsize=10, fontweight='bold')
 
 for feature in features:
 	start = feature["start"]
@@ -205,7 +204,9 @@ for feature in features:
 
 	alternate = not alternate
 
-ax_ann.set_xlim(genome_line_start, genome_line_end)
+ax_ann.set_xlim(0, sequence_length)
+ax_depth.set_xlim(0, sequence_length)
+
 ax_ann.set_ylim(-1.5, 2.0)
 ax_ann.axis('off')
 
@@ -226,9 +227,12 @@ if args.smooth:
 	print(f"[DAplot] Smoothing depth data")
 	y_depth = smooth_depth(np.array(y_depth), window_size=15)
 
-ax_depth.plot(x_depth, y_depth, color=depth_color, linewidth=0.8)
+ax_depth.plot(x_depth, y_depth, color=depth_color, linewidth=0.8, alpha=0.1)
+ax_depth.fill_between(x_depth, y_depth, color=depth_color, alpha=0.3)
+
 ax_depth.set_ylabel("Seq Depth", fontsize=10)
 ax_depth.set_xlabel("Genome Position (bp)", fontsize=10)
+ax_depth.set_ylim(0, max(y_depth) * 1.05 if len(y_depth) else 1)
 
 if args.grid:
 	ax_depth.grid(True, linestyle="--", linewidth=0.3)
