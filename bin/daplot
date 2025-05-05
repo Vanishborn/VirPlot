@@ -230,7 +230,7 @@ if args.smooth:
 ax_depth.plot(x_depth, y_depth, color=depth_color, linewidth=0.8, alpha=0.1)
 ax_depth.fill_between(x_depth, y_depth, color=depth_color, alpha=0.3)
 
-ax_depth.set_ylabel("Seq Depth", fontsize=10)
+ax_depth.set_ylabel("Read Depth", fontsize=10)
 ax_depth.set_xlabel("Genome Position (bp)", fontsize=10)
 ax_depth.set_ylim(0, max(y_depth) * 1.05 if len(y_depth) else 1)
 
