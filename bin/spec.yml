@@ -1,14 +1,17 @@
 color_mapping:
-  P0 protein: '#88B04B'
-  RNA-dependent RNA polymerase: '#92A8D1'
-  replicase protein: '#ef9b20'
-  P1 protein: '#6B5B95'
-  CP: '#ea5545'
-  MP: '#27aeef'
+  P0 protein: '#b2e061'
+  RNA-dependent RNA polymerase: '#beb9db'
+  replicase protein: '#ffb55a'
+  P1 protein: '#bd7ebe'
+  CP: '#fd7f6f'
+  MP: '#7eb0d5'
   aphid transmission protein: '#F7CAC9'
+  unknown protein 1: '#ffee65'
+  unknown protein 2: '#fdcce5'
+  unknown protein 3: '#8bd3c7'
   # Add more mappings as needed
 
-annotation_fontsize: 9
+annotation_fontsize: 13
 
 default_color: '#9F9F9F'
 

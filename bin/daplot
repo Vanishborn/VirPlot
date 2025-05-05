@@ -169,7 +169,7 @@ fig, (ax_ann, ax_depth) = plt.subplots(
 	sharex=True,
 	gridspec_kw={"height_ratios": [1, 1]}
 )
-fig.subplots_adjust(hspace=0.001)
+fig.subplots_adjust(hspace=0)
 
 
 ##############
