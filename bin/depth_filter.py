@@ -1,4 +1,11 @@
+# depth_filter.py filters depth file by a sequence name in ref
+
 import argparse
+
+
+############
+# argparse #
+############
 
 parser = argparse.ArgumentParser(description="Filter depth file by seq name")
 parser.add_argument("-i", "--input", required=True,
@@ -6,9 +13,13 @@ parser.add_argument("-i", "--input", required=True,
 parser.add_argument("-o", "--output", required=True,
 	help="Path to output filtered file")
 parser.add_argument("--seq", required=True,
-	help="Sequence to filter by")
-
+	help="Sequence name to filter by")
 args = parser.parse_args()
+
+
+########
+# main #
+########
 
 input_file = args.input
 output_file = args.output

@@ -2,7 +2,7 @@
 
 This tool generates **SVG, PDF, or PNG plots** that combine genome feature annotations from a GFF3 file and sequencing depth from a `samtools depth` file.
 
-Maintained by Henry Li from [Foundation Plant Services](https://fps.ucdavis.edu/index.cfm) at [UC Davis](https://www.ucdavis.edu/), this utility replaces legacy tools that relied on deprecated packages. It is built Python using only `numpy`, `matplotlib` and `pyyaml`, and is a quick tool for generating aligned, customizable annotation and depth plots in one combined graph.
+Maintained by Henry Li from [Foundation Plant Services](https://fps.ucdavis.edu/index.cfm) at [UC Davis](https://www.ucdavis.edu/), this utility overhauls an over-engineered implementation, replacing legacy tools that previously relied on deprecated packages. Built in Python using only `numpy`, `matplotlib` and `pyyaml`, this is a quick tool for generating aligned, customizable feature annotation and depth plots in one combined graph.
 
 ---
 
@@ -40,10 +40,11 @@ Both plots are **aligned on a shared x-axis** and exported as vector-format grap
 
 This tool runs with standard Python 3 and requires only:
 
+- `numpy`
 - `matplotlib`
 - `pyyaml`
 
-We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/) for environment and dependency management:
+We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/) for isolated environment and dependency management:
 
 ```bash
 conda create -n daplot numpy matplotlib pyyaml
@@ -81,9 +82,16 @@ title: ""
 
 ## Usage
 
+To make the combined plot:
+
 ```bash
 ./daplot [-h] -g GFF -d DEPTH -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--no-border] [--title] [--Osvg] [--Opdf] [--Opng]
 ```
+
+This utility includes two separate scripts to assist with parsing depth files:
+
+- `depth_filter.py` – Filters depth entries using a specified target sequence header. This is useful when the reference file contains multiple sequences and only a subset is needed.
+- `depth_merger.py` – Merges depth counts across multiple depth files for a single target sequence header. This helps gather total counts at each position across multiple alignments.
 
 ### Common Options
 
@@ -124,6 +132,8 @@ All major visual elements are customizable via the YAML file:
 | `title`               | Plot title                                |
 
 To update feature colors or fonts, edit `spec.yml` and rerun the script.
+
+Due to constraints of `matplotlib.pyplot.subplots`, customization of the spacing between the two plots is limited. Manual adjustments after plot generation is needed if a more compact view is desired.
 
 ---
 
