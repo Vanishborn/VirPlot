@@ -15,6 +15,7 @@ Maintained by Henry Li from [Foundation Plant Services](https://fps.ucdavis.edu/
   - [Inputs](#inputs)
   - [Usage](#usage)
     - [Common Options](#common-options)
+    - [Supplementary Script](#supplementary-script)
   - [Customization](#customization)
   - [License](#license)
 
@@ -88,11 +89,6 @@ To make the combined plot:
 ./daplot [-h] -g GFF -d DEPTH -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--no-border] [--title] [--Osvg] [--Opdf] [--Opng]
 ```
 
-This utility includes two separate scripts to assist with parsing depth files:
-
-- `depth_filter.py` – Filters depth entries using a specified target sequence header. This is useful when the reference file contains multiple sequences and only a subset is needed.
-- `depth_merger.py` – Merges depth counts across multiple depth files for a single target sequence header. This helps gather total counts at each position across multiple alignments.
-
 ### Common Options
 
 ```bash
@@ -116,6 +112,25 @@ The resulting plot will contain:
 - Color-coded boxes alternating above and below the genome line
 - Product names inside each box
 - A smooth or raw depth curve aligned below
+
+### Supplementary Script
+
+This utility includes two separate scripts to assist with parsing depth files:
+
+- `depth_filter.py` – Filters depth entries using a specified target sequence header. This is useful when the reference file contains multiple sequences and only a subset is needed.
+- `depth_merger.py` – Merges depth counts across multiple depth files for a single target sequence header. This helps gather total counts at each position across multiple alignment runs.
+
+The depth filter takes a larger depth file and writes depth information to a new depth file, filtering by the sequence header.
+
+```bash
+python3 depth_filter.py [-h] -i INPUT -o OUTPUT --seq SEQ
+```
+
+The depth merger takes multiple depth files of a single target sequence, sums the counts at each spot to a combined total, and outputs to a new depth file.
+
+```bash
+python3 depth_merger.py [-h] -i INPUT [INPUT ...] [-o OUTPUT]
+```
 
 ---
 
