@@ -62,7 +62,7 @@ for f in args.input:
 
 length_set = {len(d) for d in all_depths}
 if len(length_set) != 1:
-	print(f"[D merger] Error: Depth files have different number of positions {" ".join(str(l) for l in length_set)}")
+	print(f"[D merger] Error: Depth files have different number of positions {' '.join(str(l) for l in length_set)}")
 	sys.exit(1)
 
 positions = sorted(all_depths[0].keys())
