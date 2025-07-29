@@ -104,6 +104,8 @@ parser.add_argument("--grid", action="store_true",
 	help="Enable background grid on depth plot")
 parser.add_argument("--smooth", action="store_true", 
 	help="Smooth depth plot using moving average")
+parser.add_argument("--no-label", action="store_true",
+	help="Do not label feature names in feature rectangles")
 parser.add_argument("--no-border", action="store_true", 
 	help="Do not draw borders around feature rectangles")
 parser.add_argument("--title", action="store_true",
@@ -200,7 +202,8 @@ for feature in features:
 					 edgecolor='none' if args.no_border else 'black')
 	ax_ann.add_patch(rect)
 
-	ax_ann.text((start + end) / 2, y + feature_height / 2, product, ha='center', va='center', fontsize=annotation_fontsize, color='black')
+	if not args.no_label:
+		ax_ann.text((start + end) / 2, y + feature_height / 2, product, ha='center', va='center', fontsize=annotation_fontsize, color='black')
 
 	alternate = not alternate
 

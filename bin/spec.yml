@@ -10,8 +10,11 @@ color_mapping:
   CPm: '#F7CAC9'
   HSP70h: '#ffee65'
   HSP90h: '#fdcce5'
-  p22: '#8bd3c7'
   p20: '#8bd3c7'
+  p22: '#8bd3c7'
+  p23: '#8bd3c7'
+  p46: '#8bd3c7'
+  p60: '#8bd3c7'
   # Add more mappings as needed
 
 annotation_fontsize: 9
