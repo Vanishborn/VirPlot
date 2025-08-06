@@ -109,7 +109,7 @@ parser.add_argument("--no-label", action="store_true",
 parser.add_argument("--no-border", action="store_true", 
 	help="Do not draw borders around feature rectangles")
 parser.add_argument("--title", action="store_true",
-    help="Show title specified in YAML")
+	help="Show title specified in YAML")
 parser.add_argument("--Osvg", action="store_true", 
 	help="Output in SVG format (default)")
 parser.add_argument("--Opdf", action="store_true", 
@@ -203,7 +203,17 @@ for feature in features:
 	ax_ann.add_patch(rect)
 
 	if not args.no_label:
-		ax_ann.text((start + end) / 2, y + feature_height / 2, product, ha='center', va='center', fontsize=annotation_fontsize, color='black')
+		label_x = (start + end) / 2
+		feature_length = end - start
+		if feature_length < 600:
+			if is_above:
+				label_y = y + feature_height * 1.5
+			else:
+				label_y = y - feature_height * 1.5
+		else:
+			label_y = y + feature_height / 2
+
+		ax_ann.text(label_x, label_y, product, ha='center', va='center', fontsize=annotation_fontsize, color='black')
 
 	alternate = not alternate
 
