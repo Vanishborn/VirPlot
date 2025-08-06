@@ -98,7 +98,7 @@ To make the combined plot:
 
 ### Common Options
 
-```bash
+```
 -g, --gff         GFF3 file containing genome features
 -d, --depth       Depth file from samtools depth
 -y, --yaml        YAML file with configurations
