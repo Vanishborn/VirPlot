@@ -2,7 +2,7 @@
 
 This tool generates **SVG, PDF, or PNG plots** that combine genome feature annotations from a GFF3 file and sequencing depth from a `samtools depth` file.
 
-Maintained by Henry Li from [Foundation Plant Services](https://fps.ucdavis.edu/index.cfm) at [UC Davis](https://www.ucdavis.edu/), this utility overhauls an over-engineered implementation, replacing legacy tools that previously relied on deprecated packages. Built in Python using only `numpy`, `matplotlib` and `pyyaml`, this is a quick tool for generating aligned, customizable feature annotation and depth plots in one combined graph.
+Developed and maintained by Henry Li from [Foundation Plant Services](https://fps.ucdavis.edu/index.cfm) at [UC Davis](https://www.ucdavis.edu/), this utility overhauls an over-engineered implementation, replacing legacy tools that previously relied on deprecated packages. Built in Python using only `numpy`, `matplotlib` and `pyyaml`, this is a quick tool for generating aligned and customizable feature annotation-depth plots in one combined figure.
 
 ---
 
@@ -41,14 +41,21 @@ Both plots are **aligned on a shared x-axis** and exported as vector-format grap
 
 This tool runs with standard Python 3 and requires only:
 
-- `numpy`
 - `matplotlib`
 - `pyyaml`
 
 We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/) for isolated environment and dependency management:
 
 ```bash
-conda create -n daplot numpy matplotlib pyyaml
+conda create -n daplot matplotlib pyyaml
+conda activate daplot
+```
+
+Alternatively, install from the environment config file that comes with this tool.
+
+```bash
+cd bin
+conda env create -f env.yml
 conda activate daplot
 ```
 
@@ -62,7 +69,7 @@ Three input files are required:
 
 1. **GFF3 file** (`.gff3`) — genome annotations containing features like CDS, product, region, etc
 2. **Depth file** — generated from `samtools depth` on aligned reads
-3. **YAML file** — customization settings including feature colors, font sizes, and line color
+3. **YAML file** — customization settings including feature colors, font sizes, depth line color, or title content
 
 Example YAML (`spec.yml`):
 
@@ -86,7 +93,7 @@ title: ""
 To make the combined plot:
 
 ```bash
-./daplot [-h] -g GFF -d DEPTH -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--no-border] [--title] [--Osvg] [--Opdf] [--Opng]
+./daplot [-h] -g GFF -d DEPTH -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--name NAME] [--no-label] [--no-border] [--title] [--Opdf] [--Opng]
 ```
 
 ### Common Options
@@ -94,23 +101,24 @@ To make the combined plot:
 ```bash
 -g, --gff         GFF3 file containing genome features
 -d, --depth       Depth file from samtools depth
--y, --yaml        YAML file with color/font configuration
+-y, --yaml        YAML file with configurations
 -o, --outdir      Output directory (default: current folder)
---Osvg            Output as SVG (default)
+-n, --normalize   Normalize depth values (scales max depth to 1)
 --Opdf            Output as PDF
 --Opng            Output as PNG
---normalize       Normalize depth values (scales max depth to 1)
+--name            Base name for output file (default: daplot)
 --smooth          Smooth depth plot using moving average
 --grid            Enable background grid on depth plot
+--no-label        Remove labels in features rectangles
 --no-border       Remove borders around annotation rectangles
---title           Show title specified within YAML
+--title           Show title specified in YAML
 ```
 
 The resulting plot will contain:
 
 - A genome line labeled 5' -> 3'
-- Color-coded boxes alternating above and below the genome line
-- Product names inside each box
+- Color-coded rectangles alternating above and below the genome line
+- Product names labeled inside each box
 - A smooth or raw depth curve aligned below
 
 ### Supplementary Script
