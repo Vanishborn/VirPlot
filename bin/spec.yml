@@ -2,7 +2,6 @@ color_mapping:
   p33: '#b2e061'
   Unknown Protein: '#beb9db'
   RdRp: '#7eb0d5'
-  replicase protein: '#ffb55a'
   Methyltransferase/helicase: '#ffb55a'
   P1 protein: '#bd7ebe'
   CP: '#fd7f6f'
@@ -13,8 +12,8 @@ color_mapping:
   p20: '#8bd3c7'
   p22: '#8bd3c7'
   p23: '#8bd3c7'
-  p46: '#8bd3c7'
-  p60: '#8bd3c7'
+  p46: '#F7CAC9'
+  p60: '#b2e061'
   # Add more mappings as needed
 
 annotation_fontsize: 9

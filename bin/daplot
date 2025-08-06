@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-# daplot.py — Annotation + Depth plot in SVG/PDF/PNG
+# daplot.py — Genome Feature Annotation + Depth plot in SVG/PDF/PNG
 
+import datetime
 import numpy as np
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
@@ -89,32 +90,32 @@ def smooth_depth(y_vals, window_size=10):
 # argparse #
 ############
 
-parser = argparse.ArgumentParser(description="Virus genome SVG generator from GFF and depth")
-parser.add_argument("-g", "--gff", required=True, 
+parser = argparse.ArgumentParser(description="Virus genome feature SVG plotting tool using GFF and depth")
+parser.add_argument("-g", "--gff", required=True,
 	help="Path to GFF3 annotation file")
-parser.add_argument("-d", "--depth", required=True, 
+parser.add_argument("-d", "--depth", required=True,
 	help="Path to samtools depth file")
-parser.add_argument("-y", "--yaml", required=True, 
-	help="YAML file for color mapping")
-parser.add_argument("-o", "--outdir", default=".", 
+parser.add_argument("-y", "--yaml", required=True,
+	help="YAML file for color mapping and other specs")
+parser.add_argument("-o", "--outdir", default=".",
 	help="Output directory for the plot")
-parser.add_argument("-n", "--normalize", action="store_true", 
+parser.add_argument("-n", "--normalize", action="store_true",
 	help="Normalize depth values to max=1")
-parser.add_argument("--grid", action="store_true", 
+parser.add_argument("--grid", action="store_true",
 	help="Enable background grid on depth plot")
-parser.add_argument("--smooth", action="store_true", 
+parser.add_argument("--smooth", action="store_true",
 	help="Smooth depth plot using moving average")
+parser.add_argument("--name", default="daplot",
+	help="Base name for output file [%(default)s]")
 parser.add_argument("--no-label", action="store_true",
 	help="Do not label feature names in feature rectangles")
-parser.add_argument("--no-border", action="store_true", 
+parser.add_argument("--no-border", action="store_true",
 	help="Do not draw borders around feature rectangles")
 parser.add_argument("--title", action="store_true",
 	help="Show title specified in YAML")
-parser.add_argument("--Osvg", action="store_true", 
-	help="Output in SVG format (default)")
-parser.add_argument("--Opdf", action="store_true", 
+parser.add_argument("--Opdf", action="store_true",
 	help="Output in PDF format")
-parser.add_argument("--Opng", action="store_true", 
+parser.add_argument("--Opng", action="store_true",
 	help="Output in PNG format")
 
 args = parser.parse_args()
@@ -151,14 +152,6 @@ color_mapping, default_color, depth_color, annotation_fontsize, plot_title = loa
 
 print(f"[DAplot] Parsed {len(features)} features from GFF")
 print(f"[DAplot] Parsed {len(depth)} depth entries")
-
-if args.Opdf:
-	ext = "pdf"
-elif args.Opng:
-	ext = "png"
-else:
-	ext = "svg"
-output_path = os.path.join(args.outdir, f"daplot.{ext}")
 
 
 ############
@@ -207,9 +200,9 @@ for feature in features:
 		feature_length = end - start
 		if feature_length < 600:
 			if is_above:
-				label_y = y + feature_height * 1.5
+				label_y = y + feature_height * 0.5
 			else:
-				label_y = y - feature_height * 1.5
+				label_y = y - feature_height * 0.5
 		else:
 			label_y = y + feature_height / 2
 
@@ -258,6 +251,26 @@ if args.title:
 #######
 # out #
 #######
+
+os.makedirs(args.outdir, exist_ok=True)
+
+if args.Opdf:
+    ext = "pdf"
+elif args.Opng:
+    ext = "png"
+else:
+    ext = "svg"
+
+base_filename = args.name
+output_path = os.path.join(args.outdir, f"{base_filename}.{ext}")
+
+if os.path.exists(output_path):
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    alt_filename = f"{base_filename}-{timestamp}.{ext}"
+    output_path = os.path.join(args.outdir, alt_filename)
+    print(f"[DAplot] WARNING: File already exists. Saving to file: {alt_filename}")
+else:
+    print(f"[DAplot] Saving to file: {os.path.basename(output_path)}")
 
 fig.savefig(output_path, format=ext)
 print(f"[DAplot] Plot saved to: {output_path}")
