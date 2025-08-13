@@ -20,6 +20,8 @@ annotation_fontsize: 9
 
 default_color: '#9F9F9F'
 
+shade_color: '#CA4F35'
+
 depth_line_color: '#0077CC'
 
 title: ""

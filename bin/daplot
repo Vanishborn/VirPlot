@@ -7,6 +7,7 @@ from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 import os
 import argparse
+import csv
 import yaml
 import sys
 
@@ -75,15 +76,82 @@ def load_settings(yaml_path):
 		settings = yaml.safe_load(fp)
 	color_mapping = settings.get("color_mapping", {})
 	default_color = settings.get("default_color", "#9F9F9F")
-	depth_color = settings.get("depth_color", "blue")
-	fontsize = settings.get("annotation_fontsize", 8)
-	title = settings.get("title", "")
-	return color_mapping, default_color, depth_color, fontsize, title
+	depth_color   = settings.get("depth_color", "blue")
+	shade_color   = settings.get("shade_color", "tomato")
+	fontsize      = settings.get("annotation_fontsize", 8)
+	title         = settings.get("title", "")
+	return color_mapping, default_color, depth_color, shade_color, fontsize, title
 
 
 def smooth_depth(y_vals, window_size=10):
 	kernel = np.ones(window_size) / window_size
 	return np.convolve(y_vals, kernel, mode='same')
+
+
+def build_full_depth_array(depth_dict, seq_len):
+	y = np.zeros(seq_len, dtype=int)
+	for pos, cov in depth_dict.items():
+		if 1 <= pos <= seq_len:
+			y[pos - 1] = cov
+	x = np.arange(1, seq_len + 1, dtype=int)
+	return x, y
+
+
+def call_blocks(y, T):
+	"""
+	y: numpy array of raw depths (len = genome length)
+	T: coverage threshold
+	Returns: intervals, gaps as lists of dicts with start_bp, end_bp, length_bp, min_depth, mean_depth
+	"""
+	covered = y >= T
+
+	edges  = np.diff(np.r_[False, covered, False].astype(int))
+	starts = np.where(edges == 1)[0]
+	ends   = np.where(edges == -1)[0]
+
+	intervals = []
+	for s, e in zip(starts, ends):
+		segment = y[s:e]
+		intervals.append({
+			"start_bp": int(s + 1),
+			"end_bp": int(e),
+			"length_bp": int(e - s),
+			"min_depth": int(segment.min()) if segment.size else 0,
+			"mean_depth": float(segment.mean()) if segment.size else 0.0
+		})
+
+	notcov = ~covered
+
+	edges2   = np.diff(np.r_[False, notcov, False].astype(int))
+	g_starts = np.where(edges2 == 1)[0]
+	g_ends   = np.where(edges2 == -1)[0]
+
+	gaps = []
+	for s, e in zip(g_starts, g_ends):
+		gaps.append({
+			"start_bp": int(s + 1),
+			"end_bp": int(e),
+			"length_bp": int(e - s)
+		})
+
+	covered_bp = sum(iv["length_bp"] for iv in intervals)
+	pct_covered = 100.0 * covered_bp / len(y) if len(y) else 0.0
+
+	return intervals, gaps, pct_covered
+
+
+def write_csvs(intervals, gaps, outdir, base, T):
+	iv_path = os.path.join(outdir, f"{base}.intervals_ge{T}.csv")
+	gp_path = os.path.join(outdir, f"{base}.gaps_lt{T}.csv")
+	with open(iv_path, "w", newline="") as fp:
+		w = csv.DictWriter(fp, fieldnames=["start_bp", "end_bp", "length_bp", "min_depth", "mean_depth"])
+		w.writeheader()
+		w.writerows(intervals)
+	with open(gp_path, "w", newline="") as fp:
+		w = csv.DictWriter(fp, fieldnames=["start_bp", "end_bp", "length_bp"])
+		w.writeheader()
+		w.writerows(gaps)
+	print(f"[DAplot] Reports written: {os.path.basename(iv_path)}, {os.path.basename(gp_path)}")
 
 
 ############
@@ -111,6 +179,12 @@ parser.add_argument("--no-label", action="store_true",
 	help="Do not label feature names in feature rectangles")
 parser.add_argument("--no-border", action="store_true",
 	help="Do not draw borders around feature rectangles")
+parser.add_argument("-t", "--thresholds", nargs="+", type=int, default=[1, 5],
+	help="Coverage thresholds to call intervals and breaks [%(default)s]")
+parser.add_argument("-r", "--report", action="store_true",
+	help="Write CSV reports of intervals and breaks for each threshold")
+parser.add_argument("--shade-breaks", action="store_true",
+	help="Shade coverage gaps (<T) on the depth plot")
 parser.add_argument("--title", action="store_true",
 	help="Show title specified in YAML")
 parser.add_argument("--Opdf", action="store_true",
@@ -148,10 +222,23 @@ if not args.yaml.endswith(".yml") and not args.yaml.endswith(".yaml"):
 
 sequence_length, features = parse_gff(args.gff)
 depth = parse_depth(args.depth)
-color_mapping, default_color, depth_color, annotation_fontsize, plot_title = load_settings(args.yaml)
+color_mapping, default_color, depth_color, shade_color, annotation_fontsize, plot_title = load_settings(args.yaml)
 
 print(f"[DAplot] Parsed {len(features)} features from GFF")
 print(f"[DAplot] Parsed {len(depth)} depth entries")
+
+x_full, y_full = build_full_depth_array(depth, sequence_length)
+
+threshold_results = []
+for T in args.thresholds:
+	intervals, gaps, pct = call_blocks(y_full, T)
+	threshold_results.append((T, intervals, gaps, pct))
+	print(f"[DAplot] T={T}: {len(intervals)} intervals, {len(gaps)} breaks, {pct:.2f}% genome ≥{T}x")
+
+if args.report:
+	base = args.name
+	for T, intervals, gaps, _ in threshold_results:
+		write_csvs(intervals, gaps, args.outdir, base, T)
 
 
 ############
@@ -221,13 +308,14 @@ ax_ann.axis('off')
 # depth #
 #########
 
-x_depth = sorted(depth.keys())
-y_depth = [depth[pos] for pos in x_depth]
+x_depth = x_full
+y_depth = y_full.astype(float)
 
 if args.normalize:
 	print(f"[DAplot] Applying normalization on depth data")
-	max_val = max(y_depth)
-	y_depth = [val / max_val for val in y_depth]
+	max_val = y_depth.max() if y_depth.size else 1.0
+	if max_val > 0:
+		y_depth = y_depth / max_val
 
 if args.smooth:
 	print(f"[DAplot] Smoothing depth data")
@@ -235,6 +323,17 @@ if args.smooth:
 
 ax_depth.plot(x_depth, y_depth, color=depth_color, linewidth=0.8, alpha=0.1)
 ax_depth.fill_between(x_depth, y_depth, color=depth_color, alpha=0.3)
+
+if args.shade_breaks:
+	for T, intervals, gaps, _ in threshold_results:
+		y_T = T
+		if args.normalize:
+			denom = y_full.max() if y_full.size else 1.0
+			y_T = (T / denom) if denom > 0 else 0.0
+		ax_depth.axhline(y_T, color="gray", linestyle="--", linewidth=0.6)
+
+		for g in gaps:
+			ax_depth.axvspan(g["start_bp"], g["end_bp"], color=shade_color, alpha=0.20, lw=0)
 
 ax_depth.set_ylabel("Read Depth", fontsize=10)
 ax_depth.set_xlabel("Genome Position (bp)", fontsize=10)
@@ -255,22 +354,22 @@ if args.title:
 os.makedirs(args.outdir, exist_ok=True)
 
 if args.Opdf:
-    ext = "pdf"
+	ext = "pdf"
 elif args.Opng:
-    ext = "png"
+	ext = "png"
 else:
-    ext = "svg"
+	ext = "svg"
 
 base_filename = args.name
 output_path = os.path.join(args.outdir, f"{base_filename}.{ext}")
 
 if os.path.exists(output_path):
-    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    alt_filename = f"{base_filename}-{timestamp}.{ext}"
-    output_path = os.path.join(args.outdir, alt_filename)
-    print(f"[DAplot] WARNING: File already exists. Saving to file: {alt_filename}")
+	timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+	alt_filename = f"{base_filename}-{timestamp}.{ext}"
+	output_path = os.path.join(args.outdir, alt_filename)
+	print(f"[DAplot] WARNING: File already exists. Saving to file: {alt_filename}")
 else:
-    print(f"[DAplot] Saving to file: {os.path.basename(output_path)}")
+	print(f"[DAplot] Saving to file: {os.path.basename(output_path)}")
 
 fig.savefig(output_path, format=ext)
 print(f"[DAplot] Plot saved to: {output_path}")

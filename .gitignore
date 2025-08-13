@@ -109,8 +109,6 @@ venv.bak/
 
 /tutorial
 /backup
-/src/subset.test.py
-/src/care.test.py
-/src/test.py
 /test
 /bin/*.svg
+/bin/*.csv
