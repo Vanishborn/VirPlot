@@ -325,15 +325,8 @@ ax_depth.plot(x_depth, y_depth, color=depth_color, linewidth=0.8, alpha=0.1)
 ax_depth.fill_between(x_depth, y_depth, color=depth_color, alpha=0.3)
 
 if args.shade_breaks:
-	for T, intervals, gaps, _ in threshold_results:
-		y_T = T
-		if args.normalize:
-			denom = y_full.max() if y_full.size else 1.0
-			y_T = (T / denom) if denom > 0 else 0.0
-		ax_depth.axhline(y_T, color="gray", linestyle="--", linewidth=0.6)
-
-		for g in gaps:
-			ax_depth.axvspan(g["start_bp"], g["end_bp"], color=shade_color, alpha=0.20, lw=0)
+	for g in gaps:
+		ax_depth.axvspan(g["start_bp"], g["end_bp"], color=shade_color, alpha=0.20, lw=0)
 
 ax_depth.set_ylabel("Read Depth", fontsize=10)
 ax_depth.set_xlabel("Genome Position (bp)", fontsize=10)

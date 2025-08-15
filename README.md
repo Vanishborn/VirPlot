@@ -28,12 +28,13 @@ In Next Generation Sequencing (NGS), reads **depth** provides a measure of how c
 - Identify under or over-sequenced regions.
 - Assess the relationship between functional elements and read depth.
 - Validate annotations visually.
+- Visualize contiguous coverage intervals and reveal potential breaks or low‑support regions.
 
 This tool generates a vertically stacked plot:
-- **Top**: Gene product annotations (e.g. RdRp, CP, MP, etc) as labeled colored boxes on a genome line.
-- **Bottom**: Sequencing depth plot over the same genomic range.
+- **Top**: Gene product annotations (e.g. RdRp, CP, MP, etc.) as labeled colored boxes on a genome line.
+- **Bottom**: Sequencing depth plot over the same genomic range, with optional shading of below‑threshold gaps.
 
-Both plots are **aligned on a shared x-axis** and exported as vector-format graphics suitable for use in publications while offering other output options.
+Both plots are **aligned on a shared x-axis** and exported as vector-format graphics suitable for use in publications, with other output options available for downstream fine-tuning. 
 
 ---
 
@@ -81,6 +82,7 @@ color_mapping:
   MP: '#27aeef'
 
 default_color: '#9F9F9F'
+shade_color: '#CA4F35'
 depth_line_color: '#0077CC'
 annotation_fontsize: 9
 title: ""
@@ -93,7 +95,7 @@ title: ""
 To make the combined plot:
 
 ```bash
-./daplot [-h] -g GFF -d DEPTH -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--name NAME] [--no-label] [--no-border] [--title] [--Opdf] [--Opng]
+./daplot [-h] -g GFF -d DEPTH -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--name NAME] [--no-label] [--no-border] [-t THRESHOLDS [T ...]] [-r] [--shade-breaks] [--title] [--Opdf] [--Opng]
 ```
 
 ### Common Options
@@ -104,6 +106,9 @@ To make the combined plot:
 -y, --yaml        YAML file with configurations
 -o, --outdir      Output directory (default: current folder)
 -n, --normalize   Normalize depth values (scales max depth to 1)
+-t, --threshold   Depth cut‑offs defining contiguous intervals and breaks (default: 1 5)
+-r, --report      Write CSV reports of contiguous intervals and gaps for each threshold tested
+--shade-breaks    Shade regions in the depth plot where coverage falls below each specified threshold
 --Opdf            Output as PDF
 --Opng            Output as PNG
 --name            Base name for output file (default: daplot)
@@ -117,9 +122,11 @@ To make the combined plot:
 The resulting plot will contain:
 
 - A genome line labeled 5' -> 3'
-- Color-coded rectangles alternating above and below the genome line
-- Product names labeled inside each box
+- Color-coded feature rectangles alternating above and below the genome line
+- Optional product names labeled inside or near each box
 - A smooth or raw depth curve aligned below
+- Optional shaded gap regions for each threshold tested
+- Optional CSV report listing contiguous coverage intervals and gaps
 
 ### Supplementary Script
 
@@ -150,6 +157,7 @@ All major visual elements are customizable via the YAML file:
 | --------------------- | ----------------------------------------- |
 | `color_mapping`       | Maps product names to colors              |
 | `default_color`       | Color for unmapped products               |
+| `shade_color`         | Color for shaded gap regions              |
 | `depth_line_color`    | Line color for depth plot                 |
 | `annotation_fontsize` | Font size for labels inside feature boxes |
 | `title`               | Plot title                                |
