@@ -18,10 +18,17 @@ color_mapping:
 
 annotation_fontsize: 9
 
-default_color: '#9F9F9F'
+default_color: '#9f9f9f'
 
-shade_color: '#CA4F35'
+shade_color: '#ca4f35'
 
-depth_line_color: '#0077CC'
+depth_line_color: '#0077cc'
+
+stacked_area_colors:
+  - '#023E8A'
+  - '#0096C7'
+  - '#48CAE4'
+  # Add more if there are more depth files
+  # Will pad with default_color if missing
 
 title: ""

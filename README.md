@@ -68,9 +68,11 @@ No external packages are needed. All file parsing is done using native Python li
 
 Three input files are required:
 
-1. **GFF3 file** (`.gff3`) — genome annotations containing features like CDS, product, region, etc
+1. **GFF3 file** (`.gff3`) — genome annotations containing features like CDS, product, region, etc.
 2. **Depth file** — generated from `samtools depth` on aligned reads
 3. **YAML file** — customization settings including feature colors, font sizes, depth line color, or title content
+
+**NOTE:** If multiple depth files are give, the tool assumes they are the sequence depth of multiple trials (samples) against the same sequence and combines them into a *stacked area chart* showing the depth contribution of each sample under the combined depth line.
 
 Example YAML (`spec.yml`):
 
@@ -86,6 +88,11 @@ shade_color: '#CA4F35'
 depth_line_color: '#0077CC'
 annotation_fontsize: 9
 title: ""
+
+stacked_area_colors:
+  - '#023E8A'
+  - '#0096C7'
+  - '#48CAE4'
 ```
 
 ---
@@ -95,14 +102,15 @@ title: ""
 To make the combined plot:
 
 ```bash
-./daplot [-h] -g GFF -d DEPTH -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--name NAME] [--no-label] [--no-border] [-t THRESHOLDS [T ...]] [-r] [--shade-breaks] [--title] [--Opdf] [--Opng]
+./daplot [-h] -g GFF -d DEPTH [DEPTH ...] [-l LABELS [LABELS ...]] -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--name NAME] [--no-label] [--no-border] [-t THRESHOLDS [T ...]] [-r] [--shade-breaks] [--title] [--Opdf] [--Opng]
 ```
 
 ### Common Options
 
 ```
 -g, --gff         GFF3 file containing genome features
--d, --depth       Depth file from samtools depth
+-d, --depth       Depth file(s) obtained from samtools depth
+-l, --labels      Label(s) for each depth file
 -y, --yaml        YAML file with configurations
 -o, --outdir      Output directory (default: current folder)
 -n, --normalize   Normalize depth values (scales max depth to 1)
@@ -124,7 +132,8 @@ The resulting plot will contain:
 - A genome line labeled 5' -> 3'
 - Color-coded feature rectangles alternating above and below the genome line
 - Optional product names labeled inside or near each box
-- A smooth or raw depth curve aligned below
+- A depth curve if a single depth file is provided
+- A stacked area chart if multiple depth files are provided
 - Optional shaded gap regions for each threshold tested
 - Optional CSV report listing contiguous coverage intervals and gaps
 
@@ -161,6 +170,7 @@ All major visual elements are customizable via the YAML file:
 | `depth_line_color`    | Line color for depth plot                 |
 | `annotation_fontsize` | Font size for labels inside feature boxes |
 | `title`               | Plot title                                |
+| `stacked_area_colors` | Color pallet for stacked area chart       |
 
 To update feature colors or fonts, edit `spec.yml` and rerun the script.
 
