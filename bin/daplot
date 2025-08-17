@@ -74,6 +74,7 @@ def parse_depth(depth_path):
 def load_settings(yaml_path):
 	with open(yaml_path, "r") as fp:
 		settings = yaml.safe_load(fp)
+
 	color_mapping = settings.get("color_mapping", {})
 	default_color = settings.get("default_color", "#9F9F9F")
 	depth_l_color = settings.get("depth_line_color", "blue")
@@ -82,7 +83,7 @@ def load_settings(yaml_path):
 	stacked_color = settings.get("stacked_area_colors", [])
 	legend_loc    = settings.get("legend_location", "upper left")
 	title         = settings.get("title", "")
-	
+
 	return color_mapping, default_color, depth_l_color, shade_color, fontsize, stacked_color, legend_loc, title
 
 
@@ -194,6 +195,8 @@ parser.add_argument("-r", "--report", action="store_true",
 	help="Write CSV reports of intervals and breaks for each threshold")
 parser.add_argument("--shade-breaks", action="store_true",
 	help="Shade coverage gaps (<T) on the depth plot")
+parser.add_argument("--legend", action="store_true",
+	help="Show depth plot legend")
 parser.add_argument("--title", action="store_true",
 	help="Show title specified in YAML")
 parser.add_argument("--Opdf", action="store_true",
@@ -253,7 +256,7 @@ else:
 	labels = args.labels
 
 color_mapping, default_color, depth_l_color, shade_color, annotation_fontsize, stacked_color, legend_loc, plot_title = load_settings(args.yaml)
-print(f"[DAplot] Loaded settings from YAML")
+print(f"[DAplot] Loaded settings from {args.yaml}")
 
 x_full = np.arange(1, sequence_length + 1, dtype=int)
 y_list = []
@@ -355,7 +358,7 @@ if args.normalize:
 	y_plot      = y_plot / denom
 
 if len(y_list_plot) == 1:
-	ax_depth.plot(x_full, y_plot, color=depth_l_color, linewidth=0.8, alpha=0.1)
+	layers = ax_depth.plot(x_full, y_plot, color=depth_l_color, linewidth=0.8, alpha=0.6)
 	ax_depth.fill_between(x_full, y_plot, color=depth_l_color, alpha=0.3)
 else:
 	k = len(y_list_plot)
@@ -363,6 +366,8 @@ else:
 
 	layers = ax_depth.stackplot(x_full, *reversed(y_list_plot), colors=colors, alpha=0.6, step="pre")
 	ax_depth.plot(x_full, y_plot, color="black", linewidth=0.3, alpha=0.8, label="Combined depth")
+
+if args.legend:
 	legend = ax_depth.legend(
 		handles    = reversed(layers),
 		labels     = labels,
@@ -403,10 +408,18 @@ if args.title:
 
 os.makedirs(args.outdir, exist_ok=True)
 
+save_kwargs = {}
+extra = []
+if title_artist is not None:
+	extra.append(title_artist)
+extra.extend([prime_5_artist, prime_3_artist])
+save_kwargs.update(dict(bbox_inches="tight", bbox_extra_artists=extra, pad_inches=0.05))
+
 if args.Opdf:
 	ext = "pdf"
 elif args.Opng:
 	ext = "png"
+	save_kwargs.setdefault("dpi", 400)
 else:
 	ext = "svg"
 
@@ -420,15 +433,6 @@ if os.path.exists(output_path):
 	print(f"[DAplot] WARNING: File already exists. Saving to file: {alt_filename}")
 else:
 	print(f"[DAplot] Saving to file: {os.path.basename(output_path)}")
-
-save_kwargs = {}
-extra = []
-if title_artist is not None:
-	extra.append(title_artist)
-extra.extend([prime_5_artist, prime_3_artist])
-
-if extra:
-	save_kwargs.update(dict(bbox_inches="tight", bbox_extra_artists=extra, pad_inches=0.05))
 
 fig.savefig(output_path, format=ext, **save_kwargs)
 print(f"[DAplot] Plot saved to: {output_path}")
