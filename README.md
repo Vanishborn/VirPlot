@@ -102,7 +102,7 @@ stacked_area_colors:
 To make the combined plot:
 
 ```bash
-./daplot [-h] -g GFF -d DEPTH [DEPTH ...] [-l LABELS [LABELS ...]] -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--name NAME] [--no-label] [--no-border] [-t THRESHOLDS [T ...]] [-r] [--shade-breaks] [--title] [--Opdf] [--Opng]
+./daplot [-h] -g GFF -d DEPTH [DEPTH ...] [-l LABELS [LABELS ...]] -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--yscale {linear,symlog}] [--linthresh LINTHRESH] [--name NAME] [--no-label] [--no-border] [-t THRESHOLDS [T ...]] [-r] [--shade-breaks] [--title] [--Opdf] [--Opng]
 ```
 
 ### Common Options
@@ -121,6 +121,8 @@ To make the combined plot:
 --Opng            Output as PNG
 --name            Base name for output file (default: daplot)
 --smooth          Smooth depth plot using moving average
+--yscale          Y-axis scale method for depth plot (default: linear)
+--linthresh       Symlog linear threshold around 0 (default: 10)
 --grid            Enable background grid on depth plot
 --no-label        Remove labels in features rectangles
 --no-border       Remove borders around annotation rectangles

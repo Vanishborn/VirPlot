@@ -176,6 +176,10 @@ parser.add_argument("--grid", action="store_true",
 	help="Enable background grid on depth plot")
 parser.add_argument("--smooth", action="store_true",
 	help="Smooth depth plot using moving average")
+parser.add_argument("--yscale", choices=["linear", "symlog"], default="linear",
+	help="Y-axis scale method for depth plot [%(default)s]")
+parser.add_argument("--linthresh", type=float, default=10.0,
+	help="Symlog linear threshold around 0 [%(default)i]")
 parser.add_argument("--name", default="daplot",
 	help="Base name for output file [%(default)s]")
 parser.add_argument("--no-label", action="store_true",
@@ -293,8 +297,8 @@ alternate = True
 label_pad = int(sequence_length * 0.02)
 
 ax_ann.plot([-label_pad, sequence_length + label_pad], [y_base, y_base], color='black', linewidth=1.2)
-ax_ann.text(-label_pad * 0.4, y_base, "5'", va='center', ha='right', fontsize=10, fontweight='bold')
-ax_ann.text(sequence_length + label_pad * 0.4, y_base, "3'", va='center', ha='left', fontsize=10, fontweight='bold')
+prime_5_artist = ax_ann.text(-label_pad * 0.4, y_base, "5'", va='center', ha='right', fontsize=10, fontweight='bold')
+prime_3_artist = ax_ann.text(sequence_length + label_pad * 0.4, y_base, "3'", va='center', ha='left', fontsize=10, fontweight='bold')
 
 for feature in features:
 	start   = feature["start"]
@@ -354,7 +358,7 @@ if len(y_list_plot) == 1:
 else:
 	k = len(y_list_plot)
 	colors = stacked_color[:k] + [default_color] * max(0, k - len(stacked_color))
-	
+
 	layers = ax_depth.stackplot(x_full, *reversed(y_list_plot), colors=colors, alpha=0.6, step="pre")
 	ax_depth.plot(x_full, y_plot, color="black", linewidth=0.3, alpha=0.8, label="Combined depth")
 	legend = ax_depth.legend(
@@ -370,21 +374,25 @@ else:
 		)
 	legend.get_frame().set_linewidth(0.5)
 
-
 if args.shade_breaks:
-	for g in gaps:
-		ax_depth.axvspan(g["start_bp"], g["end_bp"], color=shade_color, alpha=0.20, lw=0)
+	for _, _, gaps_T, _ in threshold_results:
+		for g in gaps_T:
+			ax_depth.axvspan(g["start_bp"], g["end_bp"], color=shade_color, alpha=0.15, lw=0)
 
 ax_depth.set_ylabel("Read Depth", fontsize=10)
 ax_depth.set_xlabel("Genome Position (bp)", fontsize=10)
+
+if args.yscale == "symlog":
+	ax_depth.set_yscale("symlog", linthresh=args.linthresh, linscale=1)
+
 ax_depth.set_ylim(0, y_plot.max() * 1.05 if y_plot.size else 1)
 
 if args.grid:
 	ax_depth.grid(True, linestyle="--", linewidth=0.3)
 
+title_artist = None
 if args.title:
-	plt.tight_layout(rect=[0, 0, 1, 0.95])
-	fig.suptitle(plot_title, fontsize=14, fontweight="bold")
+	title_artist = fig.text(0.5, 0.95, plot_title, ha="center", va="bottom", fontsize=14, fontweight="bold")
 
 
 #######
@@ -411,5 +419,14 @@ if os.path.exists(output_path):
 else:
 	print(f"[DAplot] Saving to file: {os.path.basename(output_path)}")
 
-fig.savefig(output_path, format=ext)
+save_kwargs = {}
+extra = []
+if title_artist is not None:
+	extra.append(title_artist)
+extra.extend([prime_5_artist, prime_3_artist])
+
+if extra:
+	save_kwargs.update(dict(bbox_inches="tight", bbox_extra_artists=extra, pad_inches=0.05))
+
+fig.savefig(output_path, format=ext, **save_kwargs)
 print(f"[DAplot] Plot saved to: {output_path}")
