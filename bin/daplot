@@ -314,7 +314,7 @@ for feature in features:
 	if not args.no_label:
 		label_x = (start + end) / 2
 		feature_length = end - start
-		if feature_length < 600:
+		if feature_length < 500:
 			label_y = y + feature_height * 1.5 if is_above else y - feature_height * 0.5
 		else:
 			label_y = y + feature_height / 2
