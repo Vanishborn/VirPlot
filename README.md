@@ -74,7 +74,7 @@ Three input files are required:
 2. **Depth file** — generated from `samtools depth` on aligned reads
 3. **YAML file** — customization settings including feature colors, font sizes, depth line color, or title content
 
-**NOTE:** If multiple depth files are give, the tool assumes they are the sequence depth of multiple trials (samples) against the same sequence and combines them into a *stacked area chart* showing the depth contribution of each sample under the combined depth line.
+**NOTE:** If multiple depth files are given, the tool assumes they are the sequence depth of multiple trials (samples) against the same sequence and combines them into a *stacked area chart* showing the depth contribution of each sample under the combined depth line.
 
 Example YAML (`spec.yml`):
 
