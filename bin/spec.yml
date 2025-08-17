@@ -30,4 +30,6 @@ stacked_area_colors:
   # Add more if there are more depth files
   # Will pad with default_color if missing
 
+legend_location: "upper left"
+
 title: ""

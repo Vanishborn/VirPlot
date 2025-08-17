@@ -78,21 +78,26 @@ Example YAML (`spec.yml`):
 
 ```yaml
 color_mapping:
-  P0 protein: '#88B04B'
-  RdRp: '#ef9b20'
-  CP: '#ea5545'
-  MP: '#27aeef'
+  Polyprotein: '#ef9b20'
+  RdRp: '#7eb0d5'
+  HSP70h: '#ffee65'
+  CP: '#fd7f6f'
+  CPm: '#F7CAC9'
+  p60: '#b2e061'
+  Hypothetical Protein: '#beb9db'
 
 default_color: '#9F9F9F'
 shade_color: '#CA4F35'
 depth_line_color: '#0077CC'
 annotation_fontsize: 9
-title: ""
 
 stacked_area_colors:
   - '#023E8A'
   - '#0096C7'
   - '#48CAE4'
+
+legend_location: "upper left"
+title: ""
 ```
 
 ---
@@ -171,8 +176,9 @@ All major visual elements are customizable via the YAML file:
 | `shade_color`         | Color for shaded gap regions              |
 | `depth_line_color`    | Line color for depth plot                 |
 | `annotation_fontsize` | Font size for labels inside feature boxes |
-| `title`               | Plot title                                |
 | `stacked_area_colors` | Color pallet for stacked area chart       |
+| `legend_location`     | Location of the depth plot legend         |
+| `title`               | Plot title                                |
 
 To update feature colors or fonts, edit `spec.yml` and rerun the script.
 

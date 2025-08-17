@@ -79,9 +79,11 @@ def load_settings(yaml_path):
 	depth_l_color = settings.get("depth_line_color", "blue")
 	shade_color   = settings.get("shade_color", "tomato")
 	fontsize      = settings.get("annotation_fontsize", 8)
-	title         = settings.get("title", "")
 	stacked_color = settings.get("stacked_area_colors", [])
-	return color_mapping, default_color, depth_l_color, shade_color, fontsize, title, stacked_color
+	legend_loc    = settings.get("legend_location", "upper left")
+	title         = settings.get("title", "")
+	
+	return color_mapping, default_color, depth_l_color, shade_color, fontsize, stacked_color, legend_loc, title
 
 
 def smooth_depth(y_vals, window_size=10):
@@ -250,7 +252,7 @@ if args.labels is None:
 else:
 	labels = args.labels
 
-color_mapping, default_color, depth_l_color, shade_color, annotation_fontsize, plot_title, stacked_color = load_settings(args.yaml)
+color_mapping, default_color, depth_l_color, shade_color, annotation_fontsize, stacked_color, legend_loc, plot_title = load_settings(args.yaml)
 print(f"[DAplot] Loaded settings from YAML")
 
 x_full = np.arange(1, sequence_length + 1, dtype=int)
@@ -364,7 +366,7 @@ else:
 	legend = ax_depth.legend(
 		handles    = reversed(layers),
 		labels     = labels,
-		loc        = "upper left",
+		loc        = legend_loc,
 		fontsize   = 8,
 		frameon    = True,
 		fancybox   = False,
