@@ -1,6 +1,6 @@
-# Reads Depth and Feature Annotation Plotting Tool (DAplot)
+# VirPlot
 
-This tool generates **SVG, PDF, or PNG plots** that combine genome feature annotations from a GFF3 file and sequencing depth from a `samtools depth` file.
+This tool generates **SVG, PDF, or PNG plots** that combine viral genome feature annotations from a GFF3 file and sequencing depth from a `samtools depth` file.
 
 [![RNA-seq read depth across the Beet yellows virus genome](https://i.imgur.com/8M8e9fT.png)](https://i.imgur.com/8M8e9fT.png)
 
@@ -10,7 +10,7 @@ Developed and maintained by Henry Li for [Foundation Plant Services](https://fps
 
 ## Table of Contents
 
-- [Reads Depth and Feature Annotation Plotting Tool (DAplot)](#reads-depth-and-feature-annotation-plotting-tool-daplot)
+- [VirPlot](#virplot)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Installation](#installation)
@@ -50,8 +50,8 @@ This tool runs with standard Python 3 and requires only:
 We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/) for isolated environment and dependency management:
 
 ```bash
-conda create -n daplot matplotlib pyyaml
-conda activate daplot
+conda create -n virplot matplotlib pyyaml
+conda activate virplot
 ```
 
 Alternatively, install from the environment config file that comes with this tool.
@@ -59,7 +59,7 @@ Alternatively, install from the environment config file that comes with this too
 ```bash
 cd bin
 conda env create -f env.yml
-conda activate daplot
+conda activate virplot
 ```
 
 No external packages are needed. All file parsing is done using native Python libraries.
@@ -109,7 +109,7 @@ title: ""
 To make the combined plot:
 
 ```bash
-./daplot [-h] -g GFF -d DEPTH [DEPTH ...] [-l LABELS [LABELS ...]] -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--yscale {linear,symlog}] [--linthresh LINTHRESH] [--name NAME] [--no-label] [--no-border] [-t THRESHOLDS [T ...]] [-r] [--shade-breaks] [--title] [--Opdf] [--Opng]
+./virplot [-h] -g GFF -d DEPTH [DEPTH ...] [-l LABELS [LABELS ...]] -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--yscale {linear,symlog}] [--linthresh LINTHRESH] [--name NAME] [--no-label] [--no-border] [-t THRESHOLDS [T ...]] [-r] [--shade-breaks] [--title] [--Opdf] [--Opng]
 ```
 
 ### Common Options
@@ -126,7 +126,7 @@ To make the combined plot:
 --shade-breaks    Shade regions in the depth plot where coverage falls below each specified threshold
 --Opdf            Output as PDF
 --Opng            Output as PNG
---name            Base name for output file (default: daplot)
+--name            Base name for output file (default: virplot)
 --smooth          Smooth depth plot using moving average
 --yscale          Y-axis scale method for depth plot (default: linear)
 --linthresh       Symlog linear threshold around 0 (default: 10)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# daplot.py — Genome Feature Annotation + Depth plot in SVG/PDF/PNG
+# virplot — Viral Genome Feature Annotation + Depth plot
 
 import datetime
 import numpy as np
@@ -56,7 +56,7 @@ def parse_gff(gff_path):
 			})
 
 	if sequence_length is None:
-		print("[DAplot] ERROR: No 'region' feature found in GFF")
+		print("[VirPlot] ERROR: No 'region' feature found in GFF")
 		sys.exit(1)
 
 	return sequence_length, features
@@ -155,7 +155,7 @@ def write_csvs(intervals, gaps, outdir, base, T):
 		w = csv.DictWriter(fp, fieldnames=["start_bp", "end_bp", "length_bp"])
 		w.writeheader()
 		w.writerows(gaps)
-	print(f"[DAplot] Reports written: {os.path.basename(iv_path)}, {os.path.basename(gp_path)}")
+	print(f"[VirPlot] Reports written: {os.path.basename(iv_path)}, {os.path.basename(gp_path)}")
 
 
 ############
@@ -183,7 +183,7 @@ parser.add_argument("--yscale", choices=["linear", "symlog"], default="linear",
 	help="Y-axis scale method for depth plot [%(default)s]")
 parser.add_argument("--linthresh", type=float, default=10.0,
 	help="Symlog linear threshold around 0 [%(default)i]")
-parser.add_argument("--name", default="daplot",
+parser.add_argument("--name", default="virplot",
 	help="Base name for output file [%(default)s]")
 parser.add_argument("--no-label", action="store_true",
 	help="Do not label feature names in feature rectangles")
@@ -212,23 +212,23 @@ args = parser.parse_args()
 ##########
 
 if not os.path.isfile(args.gff):
-	print(f"[DAplot] ERROR: GFF file not found: {args.gff}")
+	print(f"[VirPlot] ERROR: GFF file not found: {args.gff}")
 	sys.exit(1)
 if not args.gff.endswith(".gff3"):
-	print(f"[DAplot] ERROR: GFF file must end with .gff3: {args.gff}")
+	print(f"[VirPlot] ERROR: GFF file must end with .gff3: {args.gff}")
 	sys.exit(1)
 for fname in args.depth:
 	if not os.path.isfile(fname):
-		print(f"[DAplot] ERROR: Depth file not found: {fname}")
+		print(f"[VirPlot] ERROR: Depth file not found: {fname}")
 		sys.exit(1)
 if args.labels and len(args.labels) != len(args.depth):
-	print(f"[DAplot] ERROR: Mismatching number of labels [{len(args.labels)}] to depth files [{len(args.depth)}]")
+	print(f"[VirPlot] ERROR: Mismatching number of labels [{len(args.labels)}] to depth files [{len(args.depth)}]")
 	sys.exit(1)
 if not os.path.isfile(args.yaml):
-	print(f"[DAplot] ERROR: YAML file not found: {args.yaml}")
+	print(f"[VirPlot] ERROR: YAML file not found: {args.yaml}")
 	sys.exit(1)
 if not args.yaml.endswith(".yml") and not args.yaml.endswith(".yaml"):
-	print(f"[DAplot] ERROR: YAML file extension error: {args.yaml}")
+	print(f"[VirPlot] ERROR: YAML file extension error: {args.yaml}")
 	sys.exit(1)
 
 
@@ -237,17 +237,17 @@ if not args.yaml.endswith(".yml") and not args.yaml.endswith(".yaml"):
 ########
 
 sequence_length, features = parse_gff(args.gff)
-print(f"[DAplot] Parsed {len(features)} features from GFF")
+print(f"[VirPlot] Parsed {len(features)} features from GFF")
 
 depth_dicts = []
 for df in args.depth:
 	depth_dict = parse_depth(df)
-	print(f"[DAplot] Parsed {len(depth_dict)} depth entries from {df}")
+	print(f"[VirPlot] Parsed {len(depth_dict)} depth entries from {df}")
 	depth_dicts.append(depth_dict)
 
 depth_file_lengths = [len(depth_dict) for depth_dict in depth_dicts]
 if len(set(depth_file_lengths)) != 1:
-	print(f"[DAplot] ERROR: Mismatching genome length in depths files {depth_file_lengths}")
+	print(f"[VirPlot] ERROR: Mismatching genome length in depths files {depth_file_lengths}")
 	sys.exit(1)
 
 if args.labels is None:
@@ -256,7 +256,7 @@ else:
 	labels = args.labels
 
 color_mapping, default_color, depth_l_color, shade_color, annotation_fontsize, stacked_color, legend_loc, plot_title = load_settings(args.yaml)
-print(f"[DAplot] Loaded settings from {args.yaml}")
+print(f"[VirPlot] Loaded settings from {args.yaml}")
 
 x_full = np.arange(1, sequence_length + 1, dtype=int)
 y_list = []
@@ -271,7 +271,7 @@ threshold_results = []
 for T in args.thresholds:
 	intervals, gaps, pct = call_blocks(y_sum.astype(int), T)
 	threshold_results.append((T, intervals, gaps, pct))
-	print(f"[DAplot] T={T}: {len(intervals)} intervals, {len(gaps)} breaks, {pct:.2f}% genome ≥{T}x")
+	print(f"[VirPlot] T={T}: {len(intervals)} intervals, {len(gaps)} breaks, {pct:.2f}% genome ≥{T}x")
 
 if args.report:
 	base = args.name
@@ -346,13 +346,13 @@ ax_ann.axis('off')
 y_list_plot = list(y_list)
 
 if args.smooth:
-	print("[DAplot] Smoothing depth data")
+	print("[VirPlot] Smoothing depth data")
 	y_list_plot = [smooth_depth(y, window_size=15) for y in y_list_plot]
 
 y_plot = np.sum(y_list_plot, axis=0) if len(y_list_plot) > 1 else y_list_plot[0]
 
 if args.normalize:
-	print("[DAplot] Normalizing depth data")
+	print("[VirPlot] Normalizing depth data")
 	denom = y_plot.max() or 1.0
 	y_list_plot = [y / denom for y in y_list_plot]
 	y_plot      = y_plot / denom
@@ -430,9 +430,9 @@ if os.path.exists(output_path):
 	timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 	alt_filename = f"{base_filename}-{timestamp}.{ext}"
 	output_path = os.path.join(args.outdir, alt_filename)
-	print(f"[DAplot] WARNING: File already exists. Saving to file: {alt_filename}")
+	print(f"[VirPlot] WARNING: File already exists. Saving to file: {alt_filename}")
 else:
-	print(f"[DAplot] Saving to file: {os.path.basename(output_path)}")
+	print(f"[VirPlot] Saving to file: {os.path.basename(output_path)}")
 
 fig.savefig(output_path, format=ext, **save_kwargs)
-print(f"[DAplot] Plot saved to: {output_path}")
+print(f"[VirPlot] Plot saved to: {output_path}")
