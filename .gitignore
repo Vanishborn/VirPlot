@@ -29,6 +29,7 @@ wheels/
 MANIFEST
 fake/
 Data/
+Journal/
 dev/
 
 # PyInstaller
