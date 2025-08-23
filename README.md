@@ -182,7 +182,7 @@ All major visual elements are customizable via the YAML file:
 | `legend_location`     | Location of the depth plot legend         |
 | `title`               | Plot title                                |
 
-To update feature colors or fonts, edit `spec.yml` and rerun the script.
+To update various color components or fonts, edit `spec.yml` and rerun the program.
 
 Due to constraints of `matplotlib.pyplot.subplots`, customization of the spacing between the two plots is limited. Manual adjustments after plot generation is needed if a more compact view is desired.
 
