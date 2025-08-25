@@ -2,7 +2,7 @@
 
 This tool generates **SVG, PDF, or PNG plots** that combine viral genome feature annotations from a GFF3 file and sequencing depth from a `samtools depth` file.
 
-[![RNA-seq read depth across the Beet yellows virus genome](https://i.imgur.com/8M8e9fT.png)](https://i.imgur.com/8M8e9fT.png)
+[![RNA-seq read depth across the Beet yellows virus genome](https://i.imgur.com/bDxrx1I.png)](https://i.imgur.com/bDxrx1I.png)
 
 Developed and maintained by Haoran (Henry) Li for [Foundation Plant Services](https://fps.ucdavis.edu/index.cfm) at [UC Davis](https://www.ucdavis.edu/), this utility overhauls an over-engineered implementation, replacing legacy tools that previously relied on deprecated packages. Built in Python using only `matplotlib` and `pyyaml`, this is a quick tool for generating customizable viral feature annotation and aligned read depth plots in one combined figure.
 
