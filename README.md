@@ -47,7 +47,7 @@ This tool runs with standard Python 3 and requires only:
 - `matplotlib`
 - `pyyaml`
 
-We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/) for isolated environment and dependency management:
+[Anaconda](https://docs.anaconda.com/anaconda/install/) is recommended for isolated environment and dependency management:
 
 ```bash
 conda create -n virplot matplotlib pyyaml
