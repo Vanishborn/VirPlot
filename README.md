@@ -109,7 +109,7 @@ title: ""
 To make the combined plot:
 
 ```bash
-./virplot [-h] -g GFF -d DEPTH [DEPTH ...] [-l LABELS [LABELS ...]] -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--yscale {linear,symlog}] [--linthresh LINTHRESH] [--name NAME] [--no-label] [--no-border] [-t THRESHOLDS [T ...]] [-r] [--shade-breaks] [--title] [--Opdf] [--Opng]
+./virplot [-h] -g GFF -d DEPTH [DEPTH ...] [-l LABELS [LABELS ...]] -y YAML [-o OUTDIR] [-n] [--grid] [--smooth] [--yscale {linear,symlog}] [--linthresh LINTHRESH] [--name NAME] [--no-label] [--no-border] [-t THRESHOLDS [T ...]] [-r] [--shade-breaks] [--legend] [--title] [--Opdf] [--Opng]
 ```
 
 ### Common Options
@@ -134,6 +134,7 @@ To make the combined plot:
 --no-label        Remove labels in features rectangles
 --no-border       Remove borders around annotation rectangles
 --title           Show title specified in YAML
+--legend          Display depth plot legend
 ```
 
 The resulting plot will contain:
