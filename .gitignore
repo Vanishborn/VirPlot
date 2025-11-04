@@ -112,5 +112,6 @@ venv.bak/
 /backup
 /test
 /bin/*.svg
+/bin/*.png
 /bin/*.csv
 /bin/backup
