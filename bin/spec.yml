@@ -9,9 +9,10 @@ color_mapping:
   CPm: '#F7CAC9'
   p20: '#8bd3c7'
   p22: '#8bd3c7'
-  p23: '#8bd3c7'
-  p46: '#F7CAC9'
-  p60: '#b2e061'
+  p24: '#8bd3c7'
+  p26: '#8bd3c7'
+  p47: '#F7CAC9'
+  p61: '#b2e061'
   Unknown Protein: '#beb9db'
   # Add more mappings as needed
 
@@ -24,9 +25,9 @@ shade_color: '#ca4f35'
 depth_line_color: '#0077cc'
 
 stacked_area_colors:
-  - '#023E8A'
-  - '#0096C7'
-  - '#48CAE4'
+  - '#f96666'
+  - '#82c4fa'
+  - '#f9da86'
   # Add more if there are more depth files
   # Will pad with default_color if missing
 
