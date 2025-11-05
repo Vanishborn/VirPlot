@@ -364,7 +364,7 @@ else:
 	k = len(y_list_plot)
 	colors = stacked_color[:k] + [default_color] * max(0, k - len(stacked_color))
 
-	layers = ax_depth.stackplot(x_full, *reversed(y_list_plot), colors=colors, alpha=0.6, step="pre")
+	layers = ax_depth.stackplot(x_full, *reversed(y_list_plot), colors=colors, alpha=0.8, step="pre")
 	ax_depth.plot(x_full, y_plot, color="black", linewidth=0.3, alpha=0.8, label="Combined depth")
 
 if args.legend:
