@@ -1,6 +1,6 @@
 color_mapping:
   Methyltransferase/helicase: '#ffb55a'
-  RdRp: '#7bbfda'
+  RdRp: '#77affd'
   HSP70h: '#ffee65'
   HSP90h: '#fdcce5'
   P1 protein: '#bd7ebe'
