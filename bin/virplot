@@ -327,6 +327,9 @@ for feature in features:
 			label_y = y + feature_height * 1.5 if is_above else y - feature_height * 0.5
 		else:
 			label_y = y + feature_height / 2
+		
+		# if product == "Methyltransferase/helicase":
+		# 	product = "   P-Pro  |  MTR                                                       HEL  "
 
 		ax_ann.text(label_x, label_y, product, ha='center', va='center', fontsize=annotation_fontsize, color='black')
 
@@ -358,13 +361,13 @@ if args.normalize:
 	y_plot      = y_plot / denom
 
 if len(y_list_plot) == 1:
-	layers = ax_depth.plot(x_full, y_plot, color=depth_l_color, linewidth=0.8, alpha=0.6)
+	layers = ax_depth.plot(x_full, y_plot, color=depth_l_color, linewidth=0.8, alpha=0.9)
 	ax_depth.fill_between(x_full, y_plot, color=depth_l_color, alpha=0.3)
 else:
 	k = len(y_list_plot)
 	colors = stacked_color[:k] + [default_color] * max(0, k - len(stacked_color))
 
-	layers = ax_depth.stackplot(x_full, *reversed(y_list_plot), colors=colors, alpha=0.8, step="pre")
+	layers = ax_depth.stackplot(x_full, *reversed(y_list_plot), colors=colors, alpha=0.9, step="pre")
 	ax_depth.plot(x_full, y_plot, color="black", linewidth=0.3, alpha=0.8, label="Combined depth")
 
 if args.legend:
